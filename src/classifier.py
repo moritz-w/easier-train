@@ -11,15 +11,18 @@ class Classifier:
     def classifyAs (self, rgbcolors, name: str):
         if name not in self.classes:
             self.classes[name] = {
-                'r': np.zeros(255),
-                'g': np.zeros(255),
-                'b': np.zeros(255)
+                'r': [0, 0, 0, 0],
+                'g': [0, 0, 0, 0],
+                'b': [0, 0, 0, 0]
             }
 
+        r_channel = self.classes[name]['r']
+        g_channel = self.classes[name]['g']
+        b_channel = self.classes[name]['b']
         for rgbcolor in rgbcolors:
-            self.classes[name]['r'][rgbcolor[0]] = 1
-            self.classes[name]['g'][rgbcolor[1]] = 1
-            self.classes[name]['b'][rgbcolor[2]] = 1
+            r_channel[rgbcolor[0] // 64] = r_channel[rgbcolor[0] // 64] | (1 << (rgbcolor[0] % 64))
+            g_channel[rgbcolor[1] // 64] = g_channel[rgbcolor[1] // 64] | (1 << (rgbcolor[1] % 64))
+            b_channel[rgbcolor[2] // 64] = b_channel[rgbcolor[2] // 64] | (1 << (rgbcolor[2] % 64))
 
 
     def classify (self, rgbcolor) -> str:
