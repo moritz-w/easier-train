@@ -5,6 +5,7 @@ import colour
 import os
 import time
 
+
 class Detector:
 
 
