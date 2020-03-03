@@ -57,6 +57,8 @@ class Detector:
         pixels = list()
         pixels.append((x, y))
 
+        imgcopy = self.img.copy()
+
         start = time.time()
         while len(pixels) > 0:
             cur = pixels.pop(-1)
@@ -74,7 +76,11 @@ class Detector:
             color_diff = colour.delta_E(base_color, self.img[y, x], method="CIE 1994")
             if color_diff > self.color_diff_tolerance:
                 self._outline.append (cur)
-                self.img[y, x] = [0, 0, 0]
+                imgcopy[y, x] = [68, 72, 30]
+                imgcopy[y if y + 1 >= self.imgheight else y + 1, x] = [68, 72, 30]
+                imgcopy[y if y - 1 < 0 else y - 1, x] = [68, 72, 30]
+                imgcopy[y, x if x + 1 >= self.imgwidth else x + 1] = [68, 72, 30]
+                imgcopy[y, x if x - 1 < 0 else x - 1] = [68, 72, 30]
                 continue
 
             # expand pixel search and add pixel color
@@ -82,15 +88,27 @@ class Detector:
             pixels.extend (((x, y + 1), (x, y - 1), (x + 1, y), (x - 1, y)))
 
         self.last_scantime = time.time() - start
+        self.img = imgcopy
+
 
     def save (self, path):
-        img = cv.cvtColor(self.img, cv.COLOR_Lab2BGR)
-        img = (img * 255).astype(int)
+        img = (cv.cvtColor(self.img, cv.COLOR_Lab2BGR) * 255).astype(np.uint8)
         cv.imwrite (os.path.abspath(path), img)
 
 
-    def lab_to_rgb (self, colorval):
-        return tuple((cv.cvtColor(np.float32([[colorval]]), cv.COLOR_Lab2RGB)[0, 0] * 255).astype(int))
+    def getCvImage (self, colorspace):
+        if colorspace == "lab":
+            return self.img
+        elif colorspace == "rgb255":
+            return (cv.cvtColor(self.img, cv.COLOR_Lab2RGB) * 255).astype(np.uint8)
+        elif colorspace == "bgr255":
+            return (cv.cvtColor(self.img, cv.COLOR_Lab2BGR) * 255).astype(np.uint8)
+        elif colorspace == "rgb":
+            return cv.cvtColor(self.img, cv.COLOR_Lab2RGB)
+        elif colorspace == "bgr":
+            return cv.cvtColor(self.img, cv.COLOR_Lab2BGR)
+        else:
+            return None
 
 
     @property
@@ -114,8 +132,3 @@ class Detector:
     def colors (self):
         colorarray = np.array([list(self._distinctColors.keys())])
         return (cv.cvtColor(colorarray, cv.COLOR_Lab2RGB) * 255).astype(int)[0]
-
-
-    @property
-    def cvimage(self):
-        return self.img
