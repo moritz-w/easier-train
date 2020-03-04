@@ -1,4 +1,5 @@
 import numpy as np
+import json
 
 from formatter import Formatter, JSONFormatter
 
@@ -45,7 +46,7 @@ class SingleColorClassifier:
         return _class
 
 
-    def writeOutput (self, filename, formatter: Formatter = JSONFormatter()):
+    def writeToFile (self, filename, formatter: Formatter = JSONFormatter()):
         success = formatter.formatToFile(self.classes, filename)
         if not success:
             print (f"Failed to write output to '{filename}' with formatter '{formatter.name}'")
@@ -78,7 +79,7 @@ class MultiColorClassifier:
 
         if name not in self.classes['colormasks']:
             self.classes['colormasks'][name] = self.colormask
-            self.classes['colormask-reverse-lookup'][self.colormask] = name
+            self.classes['colormask-reverse-lookup'][str(self.colormask)] = name
             self.colormask <<= 1
 
         colormask = self.classes['colormasks'][name]
@@ -98,10 +99,26 @@ class MultiColorClassifier:
         if colorclass == 0:
             return None
 
-        return self.classes['colormask-reverse-lookup'].get(colorclass)
+        return self.classes['colormask-reverse-lookup'].get(str(colorclass))
 
 
-    def writeOutput (self, filename, formatter: Formatter = JSONFormatter()):
+    def loadFromFile (self, filepath):
+        success = True
+
+        try:
+            with open (filepath, 'r') as f:
+                self.classes = json.load(f)
+        except IOError:
+            print (f"Failed to read file at {filepath}!")
+            success = False
+        except json.JSONDecodeError:
+            print (f"Invalid JSON in file at {filepath}")
+            success = False
+
+        return success
+
+
+    def writeToFile (self, filename, formatter: Formatter = JSONFormatter()):
         success = formatter.formatToFile(self.classes, filename)
         if not success:
             print (f"Failed to write output to '{filename}' with formatter '{formatter.name}'")
