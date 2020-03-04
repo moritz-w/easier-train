@@ -17,6 +17,7 @@ def msg_box (title, text):
 
 class Mod:
     classifier = MultiColorClassifier()
+    tolerance = 25.0
 
 
 
@@ -87,6 +88,7 @@ class ClassifyView (QtWidgets.QWidget):
         self.imgview = ImageView()
         self.settingsview = SettingsView()
         self.settingsview.classifySignal.connect (self.classify)
+        self.settingsview.setToleranceSignal.connect (self.setTolerance)
 
         self.vbox = QtWidgets.QVBoxLayout()
         self.vbox.addWidget(self.saveview, 10)
@@ -103,6 +105,9 @@ class ClassifyView (QtWidgets.QWidget):
     def classify (self, cls):
         self.imgview.classify(cls)
 
+
+    def setTolerance(self, val):
+        self.imgview.setTolerance(val)
 
 
 class SaveView (QtWidgets.QWidget):
@@ -127,7 +132,7 @@ class SaveView (QtWidgets.QWidget):
             return
 
         path = self.saveFileText.text()
-        success = Mod.classifier.writeOutput(path)
+        success = Mod.classifier.writeToFile(path)
         if not success:
             msg_box("Error", f"Failed to write output to {path}")
         else:
@@ -151,6 +156,7 @@ class ImageView (QtWidgets.QWidget):
 
     def loadImage (self, path):
         self.detector = Detector(path)
+        self.detector.color_diff_tolerance = Mod.tolerance
         self.orignal_image = (self.detector.getCvImage("bgr255"), self.detector.imgwidth, self.detector.imgheight)
         self.showImage(self.orignal_image[0], self.detector.imgwidth, self.detector.imgheight)
 
@@ -184,6 +190,11 @@ class ImageView (QtWidgets.QWidget):
         self.showImage(self.detector.getCvImage("bgr255"), self.detector.imgwidth, self.detector.imgheight)
 
 
+    def setTolerance (self, tolerance):
+        Mod.tolerance = tolerance
+        self.detector.color_diff_tolerance = Mod.tolerance
+
+
     def classify (self, cls):
         if not self.detector:
             msg_box ("Error", "Select an image first!")
@@ -201,17 +212,26 @@ class ImageView (QtWidgets.QWidget):
 class SettingsView (QtWidgets.QWidget):
 
     classifySignal = QtCore.pyqtSignal(str)
+    setToleranceSignal = QtCore.pyqtSignal(float)
 
     def __init__(self):
         super().__init__()
+
+        self.toleranceSlider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.toleranceSlider.setSingleStep(1)
+        self.toleranceSlider.setSliderPosition(25)
+        self.toleranceSlider.setMaximum(50)
+        self.toleranceSlider.setTracking(False)
 
         self.classText = QtWidgets.QLineEdit("classname")
         self.classifyBtn = QtWidgets.QPushButton("Classify")
 
         self.classText.returnPressed.connect (self.classify)
         self.classifyBtn.pressed.connect(self.classify)
+        self.toleranceSlider.valueChanged[int].connect (self.setTolerance)
 
         self.hbox = QtWidgets.QHBoxLayout()
+        self.hbox.addWidget(self.toleranceSlider)
         self.hbox.addWidget(self.classText)
         self.hbox.addWidget(self.classifyBtn)
 
@@ -220,6 +240,10 @@ class SettingsView (QtWidgets.QWidget):
 
     def classify (self):
         self.classifySignal.emit(self.classText.text())
+
+
+    def setTolerance (self, val: int):
+        self.setToleranceSignal.emit(float(val))
 
 
 def launch_ui ():
