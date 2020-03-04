@@ -66,6 +66,11 @@ class MultiColorClassifier:
         self.colormask = 1
 
 
+    @property
+    def classPresent(self):
+        return self.colormask > 1
+
+
     def classifyAs (self, rgbcolors, name: str):
 
         if isinstance(rgbcolors, np.ndarray):
