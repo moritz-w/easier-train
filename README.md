@@ -13,7 +13,7 @@ Additionally the user can select how the classified data should be saved (e.g. c
 opencv-python (version: 4.2.0.32)
 numpy (version: 1.18.1)
 colour-science (version: 0.3.15)
-PyQt5 (version: 5.12.1)
+PyQt5 (version: 5.13.1)
 ```
 
 ## Usage 
