@@ -15,6 +15,7 @@ class Detector:
         self._pixelsvisited = np.zeros((0, 0))
         self.last_scantime = -1.0
 
+        self.orignal_img = None
         self.img = None
         self.imgheight = 0
         self.imgwidth = 0
@@ -45,6 +46,7 @@ class Detector:
     def loadimage (self, path):
         self.img = cv.imread (path)
         self.img = cv.cvtColor(self.img.astype(np.float32) / 255, cv.COLOR_BGR2Lab)
+        self.orignal_img = self.img.copy()
         self.imgheight, self.imgwidth, _ = self.img.shape
         self._pixelsvisited = np.zeros ((self.imgheight, self.imgwidth))
 
@@ -109,6 +111,12 @@ class Detector:
             return cv.cvtColor(self.img, cv.COLOR_Lab2BGR)
         else:
             return None
+
+
+    def reset(self):
+        self._distinctColors.clear()
+        self._pixelsvisited = np.zeros((self.imgheight, self.imgwidth))
+        self.img = self.orignal_img
 
 
     @property
