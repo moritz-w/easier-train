@@ -41,6 +41,9 @@ of pixels is not saved when switching between images. Clicking the reset button 
 
 ![](https://i.imgur.com/HGom026.png)
 
+The tolerance setting can be used to set the maximum allowed color difference for neighbouring pixels of the initially selected
+pixel. A tolerance of 1 would mean, that the RGB color value needs to be exactly the same.
+
 ## How it works
 
 This is just a sort section that describes how this tool works.
