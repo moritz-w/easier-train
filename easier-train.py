@@ -86,6 +86,7 @@ class ClassifyView (QtWidgets.QWidget):
 
         self.saveview = SaveView()
         self.imgview = ImageView()
+
         self.settingsview = SettingsView()
         self.settingsview.classifySignal.connect (self.classify)
         self.settingsview.setToleranceSignal.connect (self.setTolerance)
@@ -141,23 +142,19 @@ class SaveView (QtWidgets.QWidget):
 
 class ImageView (QtWidgets.QWidget):
 
+
     def __init__(self):
         super().__init__()
         self.detector = None
 
-        self.layout = QtWidgets.QVBoxLayout ()
-
-        self.image = QtWidgets.QLabel(self)
-        self.image.mousePressEvent = self.pixelClicked
-
-        self.layout.addWidget(self.image)
-        self.setLayout(self.layout)
+        self.imageLabel = QtWidgets.QLabel(self)
+        self.imageLabel.mousePressEvent = self.pixelClicked
 
 
     def loadImage (self, path):
         self.detector = Detector(path)
         self.detector.color_diff_tolerance = Mod.tolerance
-        self.orignal_image = (self.detector.getCvImage("bgr255"), self.detector.imgwidth, self.detector.imgheight)
+        self.orignal_image = (self.detector.getCvImage("rgb255"), self.detector.imgwidth, self.detector.imgheight)
         self.showImage(self.orignal_image[0], self.detector.imgwidth, self.detector.imgheight)
 
 
@@ -165,11 +162,12 @@ class ImageView (QtWidgets.QWidget):
         qformat = QtGui.QImage.Format_RGB888
 
         qimg = QtGui.QImage (img.data, width, height, 3 * width, qformat)
-        qimg = qimg.rgbSwapped()
 
         imgpixmap = QtGui.QPixmap.fromImage(qimg)
-        self.image.setPixmap(imgpixmap)
-        self.image.setFixedSize(self.image.pixmap().size())
+        self.imageLabel.setPixmap(imgpixmap)
+        self.imageLabel.setFixedSize(self.imageLabel.pixmap().size())
+        self.imageLabel.move((self.geometry().width() / 2) - (imgpixmap.size().width() / 2),
+                             (self.geometry().height() / 2) - (imgpixmap.size().height() / 2))
 
 
     def restoreImage (self):
@@ -187,11 +185,13 @@ class ImageView (QtWidgets.QWidget):
         self.detector.scan(x, y)
         print (self.detector.summary)
 
-        self.showImage(self.detector.getCvImage("bgr255"), self.detector.imgwidth, self.detector.imgheight)
+        self.showImage(self.detector.getCvImage("rgb255"), self.detector.imgwidth, self.detector.imgheight)
 
 
     def setTolerance (self, tolerance):
         Mod.tolerance = tolerance
+        if not self.detector:
+            return
         self.detector.color_diff_tolerance = Mod.tolerance
 
 
@@ -222,6 +222,8 @@ class SettingsView (QtWidgets.QWidget):
         self.toleranceSlider.setSliderPosition(25)
         self.toleranceSlider.setMaximum(50)
         self.toleranceSlider.setTracking(False)
+        self.toleranceText = QtWidgets.QLabel("Tolerance: ")
+        self.toleranceValText = QtWidgets.QLabel(str(Mod.tolerance))
 
         self.classText = QtWidgets.QLineEdit("classname")
         self.classifyBtn = QtWidgets.QPushButton("Classify")
@@ -231,6 +233,8 @@ class SettingsView (QtWidgets.QWidget):
         self.toleranceSlider.valueChanged[int].connect (self.setTolerance)
 
         self.hbox = QtWidgets.QHBoxLayout()
+        self.hbox.addWidget(self.toleranceText)
+        self.hbox.addWidget(self.toleranceValText)
         self.hbox.addWidget(self.toleranceSlider)
         self.hbox.addWidget(self.classText)
         self.hbox.addWidget(self.classifyBtn)
@@ -243,6 +247,7 @@ class SettingsView (QtWidgets.QWidget):
 
 
     def setTolerance (self, val: int):
+        self.toleranceValText.setText(str(val))
         self.setToleranceSignal.emit(float(val))
 
 
