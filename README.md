@@ -4,7 +4,6 @@ The purpose of this tool is to classify colors based on the users selection. An 
 called `easy train`.  But instead of asking the user to select a rectangular region `easier-train` uses an "algorithm" 
 that automatically selects a colored area in an image based on the neighbour pixels and how similar
 their color is. It is inspired by the "Magic Wand"-Tool that is offered by Photoshop or GIMP.
-Additionally the user can select how the classified data should be saved (e.g. csv or sqlite) 
 
 ## Installation
 
