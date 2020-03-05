@@ -8,8 +8,12 @@ Additionally the user can select how the classified data should be saved (e.g. c
 
 ## Installation
 
-**dependencies**:
+Make sure you have the dependencies installed with `pip`. Then simply execute the `easier-train` python script. 
+
+**Dependencies**:
 ```text
+Python 3.7
+------------
 opencv-python (version: 4.2.0.32)
 numpy (version: 1.18.1)
 colour-science (version: 0.3.15)
@@ -18,15 +22,25 @@ PyQt5 (version: 5.13.1)
 
 ## Usage 
 
-### Test Images
+The first argument to the command line is the path to load the images from. If no path is given, the directory from 
+where the script was started is used:
 
-In the repository there are a few test images provided under `resoure/img/testimage*.png`. These are coordinates that 
-will select the main color blob in the corresponding test image (e.g. for usage in the command line tool):
+```shell script
+python3 easier-train.py /home/user/Pictures 
+```
 
-|image name|x,y coordinate|
-|---|---|
-`testimage1.png`| 71, 67
-`testimage2.png`| 97, 97 
+#### User Interface
+
+![](https://i.imgur.com/GpcD44z.png)
+
+As shown in the screenshot above the UI is divided into 3 parts. On the left hand side you can choose a PNG image that
+will be shown in the center of the UI. The toolbar at the bottom can be used for classification.
+
+To actually select a color click on a pixel in the image. The red/pink(ish) outline shows which pixels where selected.
+You can then classify the selected pixels with the classify button in the toolbar or chose more pixels. The selection
+of pixels is not saved when switching between images. Clicking the reset button will restore the original image.  
+
+![](https://i.imgur.com/HGom026.png)
 
 ## How it works
 
